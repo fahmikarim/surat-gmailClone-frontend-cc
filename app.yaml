@@ -1,5 +1,5 @@
 runtime: nodejs20 # Atau versi Node.js yang lebih baru yang didukung
-service: Deploy-Surat-Frontend # Anda bisa menggunakan nama service ini, disesuaikan dengan keinginan Anda
+service: deploy-surat-frontend # Anda bisa menggunakan nama service ini, disesuaikan dengan keinginan Anda
 instance_class: F1 # Class instance yang lebih kecil, cocok untuk traffic rendah hingga sedang
 
 handlers:
