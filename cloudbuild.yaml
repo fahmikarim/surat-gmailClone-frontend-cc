@@ -1,7 +1,7 @@
 steps:
   # Step 1: Install dependencies
-  # Menggunakan image Node.js 20 spesifik untuk memastikan kompatibilitas
-  - name: "gcr.io/cloud-builders/node:20" # Menggunakan image Node.js 20
+  # Menggunakan image resmi Node.js versi 20 dari Docker Hub
+  - name: "node:20" # Perubahan di sini!
     entrypoint: bash
     args:
       - -c
@@ -19,8 +19,8 @@ steps:
         path: /root/.npm
 
   # Step 2: Build frontend Next.js
-  # Menggunakan image Node.js 20 spesifik yang sama
-  - name: "gcr.io/cloud-builders/node:20" # Menggunakan image Node.js 20
+  # Menggunakan image resmi Node.js versi 20 yang sama
+  - name: "node:20" # Perubahan di sini!
     entrypoint: bash
     args:
       - -c
