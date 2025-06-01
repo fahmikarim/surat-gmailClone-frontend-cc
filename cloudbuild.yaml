@@ -1,7 +1,7 @@
 steps:
   # Step 1: Install dependencies
-  # Menggunakan entrypoint bash untuk logika kondisional seperti contoh Anda
-  - name: "gcr.io/cloud-builders/npm"
+  # Menggunakan image Node.js 20 spesifik untuk memastikan kompatibilitas
+  - name: "gcr.io/cloud-builders/node:20" # Menggunakan image Node.js 20
     entrypoint: bash
     args:
       - -c
@@ -19,7 +19,8 @@ steps:
         path: /root/.npm
 
   # Step 2: Build frontend Next.js
-  - name: "gcr.io/cloud-builders/npm"
+  # Menggunakan image Node.js 20 spesifik yang sama
+  - name: "gcr.io/cloud-builders/node:20" # Menggunakan image Node.js 20
     entrypoint: bash
     args:
       - -c
@@ -33,9 +34,9 @@ steps:
       - name: "npm-cache" # Menggunakan volume cache yang sama
         path: /root/.npm
     env:
-      # Variabel lingkungan yang dibutuhkan Next.js saat build (misalnya NEXT_PUBLIC_*)
       - 'NODE_ENV=production'
-      # - 'NEXT_PUBLIC_BACKEND_URL=https://surat-backend-service-140099475583.us-central1.run.app/api' # Contoh jika Anda menggunakannya
+      # Tambahkan variabel lingkungan NEXT_PUBLIC_* Anda di sini jika ada
+      # Contoh: - 'NEXT_PUBLIC_BACKEND_URL=https://surat-backend-service-140099475583.us-central1.run.app/api'
 
   # Step 3: Deploy ke App Engine
   - name: "gcr.io/google.com/cloudsdktool/cloud-sdk"
@@ -44,9 +45,7 @@ steps:
       - "app"
       - "deploy"
       - "--quiet"
-      # Jika Anda mendefinisikan 'service' di app.yaml, tidak perlu --service di sini
-      # Karena app.yaml sudah mendefinisikan service tersebut
-    dir: "." # Direktori deployment, harus root proyek agar app.yaml ditemukan
+    dir: "."
 
 options:
-  logging: CLOUD_LOGGING_ONLY # Hanya log di Cloud Logging
+  logging: CLOUD_LOGGING_ONLY
