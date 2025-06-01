@@ -1,0 +1,52 @@
+steps:
+  # Step 1: Install dependencies
+  # Menggunakan entrypoint bash untuk logika kondisional seperti contoh Anda
+  - name: "gcr.io/cloud-builders/npm"
+    entrypoint: bash
+    args:
+      - -c
+      - |
+        # Memeriksa apakah node_modules sudah ada di cache volume
+        if [ ! -d "/root/.npm/node_modules" ]; then
+          echo "Installing dependencies..."
+          npm ci --cache /root/.npm --prefer-offline # npm ci untuk install bersih
+        else
+          echo "Skipping npm install, node_modules found in cache."
+        fi
+    dir: "." # Jalankan dari direktori root proyek
+    volumes:
+      - name: "npm-cache" # Mendefinisikan volume cache
+        path: /root/.npm
+
+  # Step 2: Build frontend Next.js
+  - name: "gcr.io/cloud-builders/npm"
+    entrypoint: bash
+    args:
+      - -c
+      - |
+        echo "Building Next.js app..."
+        npm run build # Jalankan skrip build Next.js Anda
+        echo "Build completed. Checking .next folder:"
+        ls -la .next/ # Periksa konten direktori .next
+    dir: "."
+    volumes:
+      - name: "npm-cache" # Menggunakan volume cache yang sama
+        path: /root/.npm
+    env:
+      # Variabel lingkungan yang dibutuhkan Next.js saat build (misalnya NEXT_PUBLIC_*)
+      - 'NODE_ENV=production'
+      # - 'NEXT_PUBLIC_BACKEND_URL=https://surat-backend-service-140099475583.us-central1.run.app/api' # Contoh jika Anda menggunakannya
+
+  # Step 3: Deploy ke App Engine
+  - name: "gcr.io/google.com/cloudsdktool/cloud-sdk"
+    entrypoint: gcloud
+    args:
+      - "app"
+      - "deploy"
+      - "--quiet"
+      # Jika Anda mendefinisikan 'service' di app.yaml, tidak perlu --service di sini
+      # Karena app.yaml sudah mendefinisikan service tersebut
+    dir: "." # Direktori deployment, harus root proyek agar app.yaml ditemukan
+
+options:
+  logging: CLOUD_LOGGING_ONLY # Hanya log di Cloud Logging
