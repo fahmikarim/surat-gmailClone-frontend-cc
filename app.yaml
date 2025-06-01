@@ -1,0 +1,42 @@
+runtime: nodejs20 # Atau versi Node.js yang lebih baru yang didukung
+service: Deploy-Surat-Frontend # Anda bisa menggunakan nama service ini, disesuaikan dengan keinginan Anda
+instance_class: F1 # Class instance yang lebih kecil, cocok untuk traffic rendah hingga sedang
+
+handlers:
+  # Melayani aset statis Next.js yang di-build (JS, CSS, gambar, dll. yang dihasilkan oleh Next.js)
+  # Next.js menyimpan ini di direktori .next/static
+  - url: /_next/static
+    static_dir: .next/static
+    expiration: '30d' # Cache aset statis untuk waktu yang lama
+    http_headers:
+      Cache-Control: 'public, max-age=2592000, immutable'
+
+  # Melayani aset statis dari direktori public (misalnya, favicon, manifest, gambar Anda sendiri)
+  # Perhatikan bahwa Next.js secara internal juga melayani file dari public/ di root domain.
+  # Handler ini untuk memastikan caching yang tepat di App Engine.
+  - url: /(.*\.(json|ico|js|css|png|jpg|jpeg|gif|svg|woff|woff2|ttf|eot))$
+    static_files: public/\1 # Mengacu ke file di direktori public/ Anda
+    upload: public/.*\.(json|ico|js|css|png|jpg|jpeg|gif|svg|woff|woff2|ttf|eot)$
+    secure: always
+    expiration: '1h' # Default expiration untuk file statis umum, bisa disesuaikan
+
+  # Catch-all handler untuk semua rute Next.js.
+  # Ini akan menjalankan server Next.js Anda untuk SSR/API routes.
+  - url: /.*
+    script: auto # Memungkinkan App Engine untuk menjalankan aplikasi Node.js Anda
+    secure: always # Memastikan semua permintaan menggunakan HTTPS
+
+# Entrypoint untuk menjalankan aplikasi Node.js Anda
+entrypoint: npm run start
+
+# Konfigurasi penskalaan otomatis
+automatic_scaling:
+  min_instances: 0
+  max_instances: 5 # Sesuaikan berdasarkan kebutuhan dan anggaran Anda
+  min_idle_instances: 0
+  max_idle_instances: 1
+  target_cpu_utilization: 0.6
+  target_throughput_utilization: 0.6
+  max_concurrent_requests: 80
+
+default_expiration: "1h" # Default expiration untuk handler tanpa expiration spesifik
